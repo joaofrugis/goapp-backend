@@ -11,5 +11,5 @@ collection = db['predict-data']
 
 @router.post("/predict")
 async def post_predict(building: Building):
-    collection.insert_one(building)
+    collection.insert_one(dict(building))
     return building
