@@ -1,5 +1,7 @@
 from pydantic import BaseModel
 
 class Building(BaseModel):
-    name: str
-    value: float
+    area: float
+    dormitorios: int
+    banheiros: int
+    vagas: int

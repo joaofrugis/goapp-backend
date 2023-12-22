@@ -1,15 +1,15 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from app.models.building import Building
-from pymongo.mongo_client import MongoClient
-from pymongo.server_api import ServerApi
+from app.iamodels.pipeline import Pipeline
+from typing import List
 
 router = APIRouter()
-database_uri = "mongodb+srv://joaofrugis:4293784*Jaum@goappcluster.u5qlawa.mongodb.net/?retryWrites=true&w=majority"
-client = MongoClient(database_uri, server_api=ServerApi('1'))
-db = client['property-valuation']
-collection = db['predict-data']
 
-@router.post("/predict")
+@router.post("/predict", response_model=List[float])
 async def post_predict(building: Building):
-    collection.insert_one(dict(building))
-    return building
+    pipeline = Pipeline()
+    try:        
+        response = pipeline.predict(building)
+        return [round(response[0],2)]
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=e)
