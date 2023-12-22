@@ -12,4 +12,4 @@ async def post_predict(building: Building):
         response = pipeline.predict(building)
         return [round(response[0],2)]
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=e)
+        return e
