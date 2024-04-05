@@ -11,7 +11,7 @@ client = pymongo.MongoClient(uri, server_api=pymongo.server_api.ServerApi('1'))
 database = client["property-valuation"]
 predict_data = database["predict-data"]
 
-@router.post("/predict", response_model=dict)
+@router.post("/predict")
 async def post_predict(building: Building):
     pipeline = Pipeline()
     try:
