@@ -16,6 +16,7 @@ async def post_predict(building: Building):
     pipeline = Pipeline()
     try:
         response = round(pipeline.predict(building)[0],2)
+        print(building)
         building_dict = building.model_dump()
         building_dict['result'] = response
         _id = predict_data.insert_one(building_dict)

@@ -1,31 +1,21 @@
-let data = {
-	area: 1,
-	dormitorios: 1,
-	banheiros: 1,
-	vagas: 1
-}
+var myHeaders = new Headers();
+myHeaders.append("Content-Type", "application/json");
 
-const apiUrl = 'http://127.0.0.1:8000/predict'
-const requestOptions = {
-	method: 'POST',			
-	headers: {
-		"Content-type": "application/json"
-	},
-	body: JSON.stringify(data)
-}
+var raw = JSON.stringify({
+  "area": 1,
+  "dormitorios": 1,
+  "banheiros": 1,
+  "vagas": 1
+});
 
-console.log(requestOptions)
+var requestOptions = {
+  method: 'POST',
+  headers: myHeaders,
+  body: raw,
+  redirect: 'follow'
+};
 
-fetch(apiUrl, requestOptions)
-	.then(response => {
-		if (!response.ok) {
-			throw new Error('Erro na requisição');
-		}
-		return response.json();
-	})
-	.then(data => {
-		console.log('Dados recebidos:', data);
-	})
-	.catch(error => {
-		console.error('Erro:', error);
-	});
+fetch("https://goapp-property-valuation-0ef3fac9551b.herokuapp.com/predict", requestOptions)
+  .then(response => response.text())
+  .then(result => console.log(result))
+  .catch(error => console.log('error', error));
