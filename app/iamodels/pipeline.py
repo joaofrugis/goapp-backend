@@ -5,7 +5,7 @@ from app.models.building import Building
 class Pipeline:
 
     def predict(self, building: Building): 
-        pipeline = joblib.load('app/iamodels/data/model_v0.pkl')
+        pipeline = joblib.load('app/iamodels/data/model_v0_1.pkl')
 
         new_predict = pd.DataFrame(building.model_dump(), index=[0])
 
