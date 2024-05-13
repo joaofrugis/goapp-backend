@@ -10,6 +10,7 @@ uri = "mongodb+srv://joaofrugis:4293784@goappcluster.u5qlawa.mongodb.net/?retryW
 client = pymongo.MongoClient(uri, server_api=pymongo.server_api.ServerApi('1'))
 database = client["property-valuation"]
 predict_data = database["predict-data"]
+predict_result = database["predict-result"]
 
 @router.post("/predict")
 async def post_predict(building: Building):
@@ -21,4 +22,11 @@ async def post_predict(building: Building):
         _id = predict_data.insert_one(building_dict)
         return dict({"result": response,"_id": str(_id.inserted_id)})
     except ValueError as e:
+        return e
+
+@router.post("/predict-result")
+async def post_predict_result(result: dict):
+    try:
+        predict_result.insert_one(result)
+    except RuntimeError as e:
         return e
