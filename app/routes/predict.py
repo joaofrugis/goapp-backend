@@ -1,32 +1,41 @@
 from fastapi import APIRouter, HTTPException
-import pymongo.server_api
 from app.models.building import Building
+from app.models.rating import Rating
 from app.iamodels.pipeline import Pipeline
-import pymongo
-from typing import List
+from app.config.database import MongoDBConnection
+import logging
 
 router = APIRouter()
-uri = "mongodb+srv://joaofrugis:4293784@goappcluster.u5qlawa.mongodb.net/?retryWrites=true&w=majority&appName=GoAPPCluster"
-client = pymongo.MongoClient(uri, server_api=pymongo.server_api.ServerApi('1'))
-database = client["property-valuation"]
-predict_data = database["predict-data"]
-predict_result = database["predict-result"]
+pipeline = Pipeline()
+connection = MongoDBConnection()
+logger = logging.getLogger()
 
-@router.post("/predict")
-async def post_predict(building: Building):
-    pipeline = Pipeline()
-    try:
-        response = round(pipeline.predict(building)[0],2)
-        building_dict = building.model_dump()
-        building_dict['result'] = response
-        _id = predict_data.insert_one(building_dict)
-        return dict({"result": response,"_id": str(_id.inserted_id)})
-    except ValueError as e:
-        return e
-
-@router.post("/predict-result")
-async def post_predict_result(result: dict):
-    try:
-        predict_result.insert_one(result)
-    except RuntimeError as e:
-        return e
+class Predict:
+    @router.post("/predict")
+    def post_predict(building: Building):
+        try:
+            response = round(pipeline.predict(building)[0],2)
+            building_dict = building.model_dump()
+            building_dict['result'] = response
+            connection.connect()
+            _id = connection.insert_one_data(connection.get_collection('predict-data'), building_dict)
+            return dict({"result": response,"_id": str(_id.inserted_id)})
+        except Exception as error:
+            logger.error(f"Error predicting: {error}")
+            raise HTTPException(status_code=400, detail="Bad Request")
+        
+    
+    @router.post('/test')
+    def post_test(building: Building):
+        return building
+    
+    @router.post("/predict-rating")
+    def post_predict_rating(rating: Rating):
+        try:
+            rating_dict = rating.model_dump()
+            connection.connect()
+            connection.insert_one_data(connection.get_collection('predict-rating'), rating_dict)
+            return rating
+        except Exception as error:
+            logger.error(f"Error predicting: {error}")
+            raise HTTPException(status_code=400, detail="Bad Request")
